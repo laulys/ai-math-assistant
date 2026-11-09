@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 from dotenv import load_dotenv
@@ -72,8 +73,29 @@ def main(argv=None) -> int:
         return 1
 
     history: list = []
+
+    def safe_ask(question: str):
+        """Ask, but turn connection/API problems into a readable message."""
+        before = len(history)
+        try:
+            return ask(agent, history, question, show_steps=not args.quiet)
+        except Exception as exc:  # e.g. Ollama not running, invalid API key
+            del history[before:]  # forget the failed turn
+            print(f"Error talking to the model: {exc}", file=sys.stderr)
+            if os.getenv("LLM_PROVIDER", "ollama").lower() == "ollama":
+                model = os.getenv("OLLAMA_MODEL", "qwen3:8b")
+                if "not found" in str(exc):
+                    hint = f"Download the model first: ollama pull {model}"
+                else:
+                    hint = "Is Ollama running? Start it with: ollama serve"
+                print(hint, file=sys.stderr)
+            return None
+
     if args.question:
-        print(ask(agent, history, " ".join(args.question), show_steps=not args.quiet))
+        answer = safe_ask(" ".join(args.question))
+        if answer is None:
+            return 1
+        print(answer)
         return 0
 
     print("🧮 AI Math Assistant. Ask me a math question (type 'exit' to quit).\n")
@@ -86,8 +108,9 @@ def main(argv=None) -> int:
         if question.lower() in {"exit", "quit", "salir"}:
             return 0
         if question:
-            answer = ask(agent, history, question, show_steps=not args.quiet)
-            print(f"\nAssistant: {answer}\n")
+            answer = safe_ask(question)
+            if answer is not None:
+                print(f"\nAssistant: {answer}\n")
 
 
 if __name__ == "__main__":

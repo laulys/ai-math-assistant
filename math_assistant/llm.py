@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 
+PROVIDERS = ("ollama", "openai", "watsonx")
+
 
 class ConfigError(RuntimeError):
     """Raised when the environment is missing something the chosen provider needs."""
@@ -17,8 +19,18 @@ def _require(name: str) -> str:
 
 
 def get_llm():
-    """Return a LangChain chat model for LLM_PROVIDER ('openai' by default, or 'watsonx')."""
-    provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
+    """Return a LangChain chat model for LLM_PROVIDER: 'ollama' (default), 'openai' or 'watsonx'."""
+    provider = os.getenv("LLM_PROVIDER", "ollama").strip().lower()
+
+    if provider == "ollama":
+        # Free and local: the model runs on your own computer, no API key needed.
+        from langchain_ollama import ChatOllama
+
+        return ChatOllama(
+            model=os.getenv("OLLAMA_MODEL", "qwen3:8b"),
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            reasoning=False,  # skip the "thinking" phase of reasoning models: faster answers
+        )
 
     if provider == "openai":
         from langchain_openai import ChatOpenAI
@@ -39,4 +51,4 @@ def get_llm():
             project_id=_require("WATSONX_PROJECT_ID"),
         )
 
-    raise ConfigError(f"Unknown LLM_PROVIDER {provider!r}. Use 'openai' or 'watsonx'.")
+    raise ConfigError(f"Unknown LLM_PROVIDER {provider!r}. Use one of: {', '.join(PROVIDERS)}.")
