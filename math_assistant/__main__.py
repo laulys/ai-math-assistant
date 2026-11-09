@@ -12,6 +12,11 @@ import json
 import os
 import sys
 
+try:
+    import readline  # noqa: F401  enables arrow keys, history and Ctrl+L in the chat prompt
+except ImportError:  # not available on Windows
+    pass
+
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
@@ -32,6 +37,11 @@ def message_text(message) -> str:
 def format_call(call: dict) -> str:
     args = ", ".join(f"{key}={json.dumps(value)}" for key, value in call["args"].items())
     return f"{call['name']}({args})"
+
+
+def for_terminal(text: str) -> str:
+    """Drop Markdown bold markers (**80** -> 80): terminals show them as literal asterisks."""
+    return text.replace("**", "")
 
 
 def shorten(text: str, limit: int = 160) -> str:
@@ -95,7 +105,7 @@ def main(argv=None) -> int:
         answer = safe_ask(" ".join(args.question))
         if answer is None:
             return 1
-        print(answer)
+        print(for_terminal(answer))
         return 0
 
     print("🧮 AI Math Assistant. Ask me a math question (type 'exit' to quit).\n")
@@ -110,7 +120,7 @@ def main(argv=None) -> int:
         if question:
             answer = safe_ask(question)
             if answer is not None:
-                print(f"\nAssistant: {answer}\n")
+                print(f"\nAssistant: {for_terminal(answer)}\n")
 
 
 if __name__ == "__main__":

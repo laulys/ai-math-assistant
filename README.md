@@ -5,6 +5,8 @@ Built with **LangChain** (`create_agent`) and Python.
 
 > 🇪🇸 [Resumen en español abajo](#-resumen-en-español)
 
+![Demo: the assistant answers three questions, calling add, multiply, power and search_wikipedia](docs/demo.gif)
+
 Language models are great with words but unreliable with arithmetic. This agent lets the LLM do what it's good at (understanding the question and planning the steps) and hands every calculation to small, tested Python functions.
 
 Real output, running locally with Ollama (`qwen3:8b`):
@@ -15,7 +17,7 @@ $ python -m math_assistant "Add 25 and 15, then multiply by 2"
      → {"result": 40}
   🔧 multiply(numbers=[40, 2])
      → {"result": 80}
-The result of adding 25 and 15, then multiplying by 2, is **80**.
+The result of adding 25 and 15, then multiplying by 2, is 80.
 
 $ python -m math_assistant "Divide 100 by 0"
   🔧 divide(numbers=[100, 0])
@@ -36,7 +38,7 @@ $ python -m math_assistant "What is the population of Canada? Multiply it by 0.7
      → Population of Canada: Canada ranks 37th by population among countries of the world, comprising about 0.5% of the world's total, with about 41.5 million Canadia…
   🔧 multiply(numbers=[41500000, 0.75])
      → {"result": 31125000}
-The population of Canada is approximately 41,500,000. When multiplied by 0.75, the result is **31,125,000**.
+The population of Canada is approximately 41,500,000. When multiplied by 0.75, the result is 31,125,000.
 ```
 
 ## How it works
@@ -116,6 +118,8 @@ pytest
 ```
 
 The tests need no API key and no internet. GitHub Actions runs them on every push.
+
+The demo GIF is recorded with [VHS](https://github.com/charmbracelet/vhs): `vhs docs/demo.tape`.
 
 ## What I learned / improvements over the course lab
 
