@@ -1,0 +1,7 @@
+langchain>=1.0
+langchain-core>=1.0
+langchain-openai>=1.0
+python-dotenv>=1.0
+requests>=2.31
+# Optional, only for LLM_PROVIDER=watsonx:
+# langchain-ibm>=1.1
